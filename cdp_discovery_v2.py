@@ -43,7 +43,7 @@ def connect (devices):
             net_connect = ConnectHandler(**device_para)
             Device_Name = net_connect.find_prompt()
             # Device_Name = Device_Name.replace('#', '')
-            output = net_connect.send_command("show cdp neighbors detail | in Device ID:.+\\.com|IP address:")
+            output = net_connect.send_command("show cdp neighbors detail | in Device ID:.+\\.com|IP address:|Platform|Version")
             find_matches(Device_Name, output)
             net_connect.disconnect()
         except paramiko.ssh_exception.AuthenticationException:
@@ -63,7 +63,7 @@ def connect (devices):
             pass
 
 def find_matches (Device_Name, output):
-    regex = '''(Device ID: .+\s+(?:IP address:.+\s+))'''
+    regex = '''(Device ID: .+\s+IP address:\s+\d+\.\d+\.\d+\.\d+\s*Platform:.+\s*Capabilities:.+\s*Version :\s*.+Version \S+)'''
     pattern = re.compile(regex)
     matches = pattern.findall(output)
     matches = set(matches)
@@ -73,6 +73,8 @@ def find_matches (Device_Name, output):
     else:
         for match in matches:
             match = re.sub('\.\w+\.com', '', match)
+            match = re.sub('(Platform:\s*.+),\s*(Capabilities:\s*.+)', '  \\1\n  \\2', match)
+            match = re.sub('(Version :)\n(.+),', '  \\1 \\2', match)
             if match not in match_set:
                 match_set.add(match)
                 # print(match)
@@ -88,5 +90,5 @@ if __name__ == '__main__':
     sys.stdout = open('matches_set@' + str(timeStamp) + ".txt", 'w')
     connect(device_para)
     for m in sorted(match_set):
-        print(m)
+        print('\n'+m)
     sys.stdout.close()
