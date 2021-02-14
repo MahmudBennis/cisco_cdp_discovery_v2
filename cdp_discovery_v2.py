@@ -7,9 +7,7 @@ import netmiko
 import paramiko
 from netmiko import ConnectHandler
 
-direc = 'Z:\Routing & Switching Unit\PythonCodes'
 excelFile = "TestDevice.xlsx"
-jopsDirec = 'Z:\Routing & Switching Unit\PythonCodes\JOPS'
 timeStamp = time.strftime("__[%Y.%b.%d].[%I.%M.%S.%p]")
 
 device_type = "cisco_ios"
@@ -19,14 +17,9 @@ ip = input('Enter the seed device IP: ')
 
 match_set = {""}
 
-def open_file (direc, excelFile, jopsDirec, timeStamp):
-    os.chdir(direc)
+def open_file (excelFile):
     wb = openpyxl.load_workbook(excelFile)
     ws = wb.worksheets [0]
-    os.chdir(jopsDirec)
-    directory = 'New JOP__Add Delete Command' + str(timeStamp)
-    os.mkdir(directory)
-    os.chdir(jopsDirec + '\\' + directory)
     devices = []
     row = 2
     column = 1
@@ -85,7 +78,7 @@ def find_matches (Device_Name, output):
                 connect(device_para)
 
 if __name__ == '__main__':
-    devices_xl = open_file(direc, excelFile, jopsDirec, timeStamp)
+    # devices_xl = open_file(excelFile)
     device_para = [{'device_type': device_type, 'ip': ip, 'username': username, 'password': password}]
     sys.stdout = open('matches_set@' + str(timeStamp) + ".txt", 'w')
     connect(device_para)
